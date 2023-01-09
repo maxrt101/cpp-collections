@@ -16,7 +16,7 @@ endif
 
 build: install_headers
 	$(info [+] Building)
-	$(CXX) $(CXXFLAGS) test.cc -o $(BUILD_DIR)/bin/test
+	$(CXX) $(CXXFLAGS) $(TOPDIR)/tests.cc -o $(BUILD_DIR)/bin/tests
 	for file in $(TOPDIR)/tests/test_*.cc; do \
 		$(CXX) $(CXXFLAGS) $$file -o $(BUILD_DIR)/bin/$$(basename $${file%.*}); \
 	done

@@ -37,12 +37,14 @@ class TestFramework {
   }
 
   inline int run(int argc, char ** argv) {
+    std::string testName;
+
     if (argc > 1) {
-      for (size_t i = 0; i < argc; i++) {
+      for (size_t i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
           printf(
             "mrt.collections Test Framework (test '%s')\n"
-            "Usage: %s [OPTIONS]\n"
+            "Usage: %s [OPTIONS] [TEST]\n"
             "Options:\n"
             "  -c, --count  - Prints count of tests\n"
             "  -l, --list   - Prints list of tests\n"
@@ -58,38 +60,61 @@ class TestFramework {
             printf("%s ", test.name.c_str());
           }
           printf("\n");
+          return 0;
         } else if (!strcmp(argv[i], "-q") || !strcmp(argv[i], "--quiet")) {
           m_isQuiet = true;
         } else {
-          printf("%sERROR%s: Unknown argument\nType '%s -h' for usage\n", COLOR_RED, COLOR_RESET, argv[0]);
-          return 1;
+          if (testName.empty()) {
+            testName = argv[i];
+          } else {
+            printf("%sERROR%s: Unknown argument\nType '%s -h' for usage\n", COLOR_RED, COLOR_RESET, argv[0]);
+            return 1;
+          }
         }
       }
     }
 
-    return runTests();
+    return testName.empty() ? runTests() : !runTest(testName);
   }
 
  private:
+  bool runTest(const Test& test) {
+    bool result = test.fn();
+    if (result) {
+      if (!m_isQuiet) {
+        printf("[  %sOK%s  ] %s\n", COLOR_GREEN, COLOR_RESET, test.name.c_str());
+      }
+    } else {
+      if (!m_isQuiet) {
+        printf("[ %sFAIL%s ] %s\n", COLOR_RED, COLOR_RESET, test.name.c_str());
+      }
+    }
+    return result;
+  }
+
+  bool runTest(const std::string& testName) {
+    for (auto& test : m_tests) {
+      if (test.name == testName) {
+        return runTest(test);
+      }
+    }
+    printf("%sERROR%s: Can't find test '%s'\n", COLOR_RED, COLOR_RESET, testName.c_str());
+    return false;
+  }
+
   int runTests() {
     printf("Test '%s'\n", m_name.c_str());
     size_t succeded = 0;
     size_t failed = 0;
     for (auto& test : m_tests) {
-      bool result = test.fn();
+      bool result = runTest(test);
       if (result) {
         succeded++;
-        if (!m_isQuiet) {
-          printf("[  %sOK%s  ] %s\n", COLOR_GREEN, COLOR_RESET, test.name.c_str());
-        }
       } else {
         failed++;
-        if (!m_isQuiet) {
-          printf("[ %sFAIL%s ] %s\n", COLOR_RED, COLOR_RESET, test.name.c_str());
-        }
       }
     }
-    
+
     if (!m_isQuiet) {
       printf(
         "Succeded: %s%d%s\n"

@@ -144,7 +144,7 @@ class List {
   }
 
   inline virtual ~List() {
-    clean();
+    clear();
   }
 
   inline size_t size() const { return m_size; }
@@ -221,12 +221,12 @@ class List {
     return false;
   }
 
-    inline Array<size_t> find(const T& value, size_t startIdx = 0) const {
+  inline Array<size_t> find(const T& value, size_t startIdx = 0) const {
     Array<size_t> indexes;
 
     size_t index = 0;
     for (Node* node = m_head; node; node = node->next) {
-      if (index >= startIndex) {
+      if (index >= startIdx) {
         if (node->value == value) {
           indexes.append(index);
         }
@@ -240,7 +240,7 @@ class List {
   inline size_t lfind(const T& value, size_t startIdx = 0) const {
     size_t index = 0;
     for (Node* node = m_head; node; node = node->next) {
-      if (index >= startIndex) {
+      if (index >= startIdx) {
         if (node->value == value) {
           return index;
         }
@@ -254,7 +254,7 @@ class List {
   inline size_t rfind(const T& value, size_t startIdx = 0) const {
     size_t index = m_size-1;
     for (Node* node = m_tail; node; node = node->prev) {
-      if (index <= startIndex) {
+      if (index <= startIdx) {
         if (node->value == value) {
           return index;
         }
@@ -296,7 +296,7 @@ class List {
 
   template <typename R>
   inline R reduce(std::function<R(R, const T&)> reducer, R startValue = {}) {
-    R result = startValue
+    R result = startValue;
     for (Node* node = m_head; node; node = node->next) {
       result = reducer(result, node->value);
     }
@@ -433,7 +433,7 @@ class List {
   }
 
   inline Node* insertAfter(Node* node, const T& value) {
-    if (!node) return;
+    if (!node) return nullptr;
     Node* newNode = new Node(value, node, node->next);
     node->next = newNode;
     m_size++;
@@ -441,7 +441,7 @@ class List {
   }
 
   inline Node* insertBefore(Node* node, const T& value) {
-    if (!node) return;
+    if (!node) return nullptr;
     Node* newNode = new Node(value, node->prev, node);
     node->prev = newNode;
     m_size++;

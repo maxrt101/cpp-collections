@@ -40,6 +40,16 @@ concept Subscriptable = requires (C c, K k) {
 template <typename C, typename T>
 concept Indexable = Subscriptable<C, size_t, T>;
 
+template <typename T>
+concept Hashable = requires (T t) {
+  { t.hash() } -> std::same_as<std::size_t>;
+}
+
+template <typename T>
+concept ConvertibleToString = requires (T t) {
+  t.toString();
+}
+
 } /* namespace mrt */
 
 #endif /* _MRT_COLLECTIONS_UTILS_CONCEPTS_H_ */

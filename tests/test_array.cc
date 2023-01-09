@@ -60,6 +60,15 @@ bool test_remove() {
   return arr == expected;
 }
 
+bool test_remove_many() {
+  mrt::Array<int> arr = {0, 1, 2, 3, 4};
+  mrt::Array<int> expected = {0, 1, 4};
+  
+  arr.remove(2, 4);
+
+  return arr == expected;
+}
+
 bool test_resize() {
   mrt::Array<int> arr;
   mrt::Array<int> expected = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
@@ -194,6 +203,13 @@ bool test_reduceRight() {
   return arr.reduceRight<int>([](int s, auto x) { return x - s; }) == 4;
 }
 
+bool test_map() {
+  mrt::Array<int> arr = {1, 2, 3};
+  mrt::Array<std::string> expected = {"1", "2", "3"};
+
+  return arr.map<std::string>([](auto x) { return std::to_string(x); }) == expected;
+}
+
 bool test_get() {
   mrt::Array<int> arr = {0, 1, 2, 3, 4};
 
@@ -238,40 +254,56 @@ bool test_or() {
   return (arr | arr2) == expected;
 }
 
+bool test_iterators() {
+  mrt::Array<int> arr = {0, 1, 2, 3, 4};
+
+  size_t index = 0;
+  for (auto it = arr.begin(); it != arr.end(); it++) {
+    if (*it != arr[index] || it.index() != index) return false;
+    index++;
+  }
+
+  return true;
+}
+
 int main(int argc, char ** argv) {
   mrt::TestFramework framework("array");
 
-  // framework.addTest("test_", test_);
-  framework.addTest("test_copy", test_copy);
-  framework.addTest("test_append", test_append);
-  framework.addTest("test_prepend", test_prepend);
-  framework.addTest("test_pop", test_pop);
-  framework.addTest("test_insert", test_insert);
-  framework.addTest("test_remove", test_remove);
-  framework.addTest("test_resize", test_resize);
-  framework.addTest("test_reserve", test_reserve);
-  framework.addTest("test_clear", test_clear);
-  framework.addTest("test_empty", test_empty);
-  framework.addTest("test_filled", test_filled);
-  framework.addTest("test_contains", test_contains);
-  framework.addTest("test_slice", test_slice);
-  framework.addTest("test_find", test_find);
-  framework.addTest("test_lfind", test_lfind);
-  framework.addTest("test_rfind", test_rfind);
-  framework.addTest("test_unique", test_unique);
-  framework.addTest("test_reverse", test_reverse);
-  framework.addTest("test_sort_asc", test_sort_asc);
-  framework.addTest("test_sort_desc", test_sort_desc);
-  framework.addTest("test_foreach", test_foreach);
-  framework.addTest("test_filter", test_filter);
-  framework.addTest("test_reduce", test_reduce);
-  framework.addTest("test_reduceRight", test_reduceRight);
-  framework.addTest("test_get", test_get);
-  framework.addTest("test_equals", test_equals);
-  framework.addTest("test_notequals", test_notequals);
-  framework.addTest("test_combine", test_combine);
-  framework.addTest("test_and", test_and);
-  framework.addTest("test_or", test_or);
+  framework.addTests({
+    {"test_copy", test_copy},
+    {"test_append", test_append},
+    {"test_prepend", test_prepend},
+    {"test_pop", test_pop},
+    {"test_insert", test_insert},
+    {"test_remove", test_remove},
+    {"test_remove_many", test_remove_many},
+    {"test_resize", test_resize},
+    {"test_reserve", test_reserve},
+    {"test_clear", test_clear},
+    {"test_empty", test_empty},
+    {"test_filled", test_filled},
+    {"test_contains", test_contains},
+    {"test_slice", test_slice},
+    {"test_find", test_find},
+    {"test_lfind", test_lfind},
+    {"test_rfind", test_rfind},
+    {"test_unique", test_unique},
+    {"test_reverse", test_reverse},
+    {"test_sort_asc", test_sort_asc},
+    {"test_sort_desc", test_sort_desc},
+    {"test_foreach", test_foreach},
+    {"test_filter", test_filter},
+    {"test_reduce", test_reduce},
+    {"test_reduceRight", test_reduceRight},
+    {"test_map", test_map},
+    {"test_get", test_get},
+    {"test_equals", test_equals},
+    {"test_notequals", test_notequals},
+    {"test_combine", test_combine},
+    {"test_and", test_and},
+    {"test_or", test_or},
+    {"test_iterators", test_iterators},
+  });
 
   return framework.run(argc, argv);
 }

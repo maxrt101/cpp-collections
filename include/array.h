@@ -295,8 +295,19 @@ class Array {
     m_size--;
   }
 
+  inline void remove(size_t start, size_t end) {
+    for (size_t i = start; i < m_size; i++) {
+      m_buffer[i] = m_buffer[i + end - start];
+    }
+    m_size -= end - start;
+  }
+
   inline void remove(const Iterator& it) {
     remove(it.index());
+  }
+
+  inline void remove(const Iterator& start, const Iterator& end) {
+    remove(start.index(), end.index());
   }
 
   inline void reserve(size_t size) {
@@ -336,7 +347,7 @@ class Array {
     return false;
   }
 
-  inline Array slice(size_t start, size_t end = 0) {
+  inline Array slice(size_t start, size_t end = 0) const {
     Array result;
 
     if (end == 0) {
@@ -424,13 +435,13 @@ class Array {
     return result;
   }
 
-  inline void foreach(std::function<void(const T&)> f) {
+  inline void foreach(std::function<void(const T&)> f) const {
     for (size_t i = 0; i < m_size; i++) {
       f(m_buffer[i]);
     }
   }
 
-  inline Array filter(std::function<bool(const T&)> pred) {
+  inline Array filter(std::function<bool(const T&)> pred) const {
     Array result;
     result.reserve(size());
     for (size_t i = 0; i < m_size; i++) {
@@ -441,8 +452,8 @@ class Array {
     return result;
   }
 
-  template <typename R>
-  inline R reduce(std::function<R(R, const T&)> reducer, R startValue = {}) {
+  template <typename R = T>
+  inline R reduce(std::function<R(R, const T&)> reducer, R startValue = {}) const {
     R result = startValue;
     for (size_t i = 0; i < m_size; i++) {
       result = reducer(result, m_buffer[i]);
@@ -450,11 +461,20 @@ class Array {
     return result;
   }
 
-  template <typename R>
-  inline R reduceRight(std::function<R(R, const T&)> reducer, R startValue = {}) {
+  template <typename R = T>
+  inline R reduceRight(std::function<R(R, const T&)> reducer, R startValue = {}) const {
     R result = startValue;
     for (size_t i = m_size; i > 0; i--) {
       result = reducer(result, m_buffer[i-1]);
+    }
+    return result;
+  }
+
+  template <typename R = T>
+  inline Array<R> map(std::function<R(const T&)> mapper) const {
+    Array<R> result;
+    for (size_t i = 0; i < m_size; i++) {
+      result.append(mapper(m_buffer[i]));
     }
     return result;
   }
@@ -522,6 +542,18 @@ class Array {
     }
 
     return result;
+  }
+
+  inline Array& operator+=(const Array& rhs) {
+    for (size_t i = 0; i < rhs.m_size; i++) {
+      append(rhs[i]);
+    }
+    return *this;
+  }
+
+  inline Array& operator+=(const T& rhs) {
+    append(rhs);
+    return *this;
   }
 
   inline Array operator&(const Array& rhs) const {
