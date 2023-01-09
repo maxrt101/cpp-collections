@@ -5,6 +5,9 @@
 #include <functional>
 #include <concepts>
 #include <cstdlib>
+#include <mrt/utils/constants.h>
+#include <mrt/sort/merge.h>
+#include <mrt/sort.h>
 
 namespace mrt {
 
@@ -57,6 +60,50 @@ class Array {
       return it;
     }
 
+    Iterator operator+(int rhs) {
+      Iterator it = *this;
+      it.m_index += rhs;
+      return it;
+    }
+
+    Iterator operator+(const Iterator& rhs) {
+      Iterator it = *this;
+      it.m_index += rhs.m_index;
+      return it;
+    }
+
+    Iterator operator-(int rhs) {
+      Iterator it = *this;
+      it.m_index -= rhs;
+      return it;
+    }
+
+    Iterator operator-(const Iterator& rhs) {
+      Iterator it = *this;
+      it.m_index -= rhs.m_index;
+      return it;
+    }
+
+    Iterator& operator+=(int rhs) {
+      m_index += rhs;
+      return *this;
+    }
+
+    Iterator& operator+=(const Iterator& rhs) {
+      m_index += rhs.m_index;
+      return *this;
+    }
+
+    Iterator& operator-=(int rhs) {
+      m_index -= rhs;
+      return *this;
+    }
+
+    Iterator& operator-=(const Iterator& rhs) {
+      m_index -= rhs.m_index;
+      return *this;
+    }
+
    private:
     Array* m_array = nullptr;
     size_t m_index = 0;
@@ -106,6 +153,50 @@ class Array {
       return it;
     }
 
+    Iterator operator+(int rhs) {
+      Iterator it = *this;
+      it.m_index += rhs;
+      return it;
+    }
+
+    Iterator operator+(const Iterator& rhs) {
+      Iterator it = *this;
+      it.m_index += rhs.m_index;
+      return it;
+    }
+
+    Iterator operator-(int rhs) {
+      Iterator it = *this;
+      it.m_index -= rhs;
+      return it;
+    }
+
+    Iterator operator-(const Iterator& rhs) {
+      Iterator it = *this;
+      it.m_index -= rhs.m_index;
+      return it;
+    }
+
+    Iterator& operator+=(int rhs) {
+      m_index += rhs;
+      return *this;
+    }
+
+    Iterator& operator+=(const Iterator& rhs) {
+      m_index += rhs.m_index;
+      return *this;
+    }
+
+    Iterator& operator-=(int rhs) {
+      m_index -= rhs;
+      return *this;
+    }
+
+    Iterator& operator-=(const Iterator& rhs) {
+      m_index -= rhs.m_index;
+      return *this;
+    }
+
    private:
     const Array* m_array = nullptr;
     size_t m_index = 0;
@@ -134,9 +225,20 @@ class Array {
     clear();
   }
 
-  static inline Array withSize(size_t size) {} // FIXME: name
+  static inline Array empty(size_t size) {
+    Array result;
+    result.reserve(size);
+    return result;
+  }
 
-  static inline Array filledWith(size_t size, T element) {} // FIXME: name
+  static inline Array filled(size_t size, T element) {
+    Array result;
+    result.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+      result.append(element);
+    }
+    return result;
+  }
 
   inline size_t size() const { return m_size; }
   inline size_t capacity() const { return m_capacity; }
@@ -166,6 +268,11 @@ class Array {
     m_size++;
   }
 
+  inline T pop() {
+    m_size--;
+    return std::move(m_buffer[m_size]);
+  }
+
   inline void insert(size_t index, const T& element) {
     if (m_size + 1 >= m_capacity) {
       reserve(m_capacity * GROWTH_FACTOR);
@@ -178,7 +285,7 @@ class Array {
   }
 
   inline void insert(const Iterator& it, const T& element) {
-    insert(it.index());
+    insert(it.index(), element);
   }
 
   inline void remove(size_t index) {
@@ -229,6 +336,94 @@ class Array {
     return false;
   }
 
+  inline Array slice(size_t start, size_t end = 0) {
+    Array result;
+
+    if (end == 0) {
+      for (size_t i = 0; i < start; i++) {
+        result.append(m_buffer[i]);
+      }
+    } else {
+      for (size_t i = start; i < end; i++) {
+        result.append(m_buffer[i]);
+      }
+    }
+
+    return result;
+  }
+
+  inline Array<size_t> find(const T& value, size_t startIdx = 0) const {
+    Array<size_t> indexes;
+
+    for (size_t i = startIdx; i < m_size; i++) {
+      if (m_buffer[i] == value) {
+        indexes.append(i);
+      }
+    }
+
+    return indexes;
+  }
+
+  inline size_t lfind(const T& value, size_t startIdx = 0) const {
+    for (size_t i = startIdx; i < m_size; i++) {
+      if (m_buffer[i] == value) {
+        return i;
+      }
+    }
+
+    return nidx;
+  }
+
+  inline size_t rfind(const T& value, size_t startIdx = 0) const {
+    for (size_t i = (startIdx ? startIdx : m_size-1); i >= 0; i--) {
+      if (m_buffer[i] == value) {
+        return i;
+      }
+    }
+
+    return nidx;
+  }
+
+  inline Array unique() {
+    Array result;
+
+    for (size_t i = 0; i < m_size; i++) {
+      if (!result.contains(m_buffer[i])) {
+        result.append(m_buffer[i]);
+      }
+    }
+
+    return result;
+  }
+
+  inline void reverse() {
+    *this = reversed();
+  }
+
+  inline Array reversed() {
+    Array result;
+
+    for (size_t i = m_size; i > 0; i--) {
+      result.append(m_buffer[i-1]);
+    }
+
+    return result;
+  }
+
+  template <Sorter<T, Array> S = MergeSort>
+  inline void sort(SortComparator<T> comparator = asc<T>, S sorter = {}) {
+    sorter.sort(comparator, *this);
+  }
+
+  template <Sorter<T, Array> S = MergeSort>
+  inline Array sorted(SortComparator<T> comparator = asc<T>, S sorter = {}) {
+    Array result = *this;
+
+    sorter.sort(comparator, result);
+
+    return result;
+  }
+
   inline void foreach(std::function<void(const T&)> f) {
     for (size_t i = 0; i < m_size; i++) {
       f(m_buffer[i]);
@@ -247,16 +442,25 @@ class Array {
   }
 
   template <typename R>
-  inline R reduce(std::function<R(R, const T&)> reducer) {
-    R result;
+  inline R reduce(std::function<R(R, const T&)> reducer, R startValue = {}) {
+    R result = startValue;
     for (size_t i = 0; i < m_size; i++) {
       result = reducer(result, m_buffer[i]);
     }
     return result;
   }
 
-  inline T& get(size_t index, const T& defaultValue) {
-    if (index < 0) return (m_size - index >= 0) ?  m_buffer[m_size - index] : defaultValue;
+  template <typename R>
+  inline R reduceRight(std::function<R(R, const T&)> reducer, R startValue = {}) {
+    R result = startValue;
+    for (size_t i = m_size; i > 0; i--) {
+      result = reducer(result, m_buffer[i-1]);
+    }
+    return result;
+  }
+
+  inline T& get(size_t index, T defaultValue) {
+    if (index < 0) return (m_size - index >= 0) ? m_buffer[m_size - index] : defaultValue;
     return (index < m_size) ? m_buffer[index] : defaultValue;
   }
 
@@ -276,8 +480,9 @@ class Array {
   }
 
   inline Array& operator=(const Array& rhs) {
+    clear();
     reserve(rhs.m_capacity);
-    for (size_t i = 0; i < m_size; i++) {
+    for (size_t i = 0; i < rhs.m_size; i++) {
       append(rhs.m_buffer[i]);
     }
     return *this;

@@ -5,6 +5,8 @@
 #include <functional>
 #include <concepts>
 #include <cstdlib>
+#include <mrt/utils/constants.h>
+#include <mrt/array.h>
 
 namespace mrt {
 
@@ -175,6 +177,15 @@ class List {
     m_size++;
   }
 
+  inline T pop() {
+    if (!m_head) {
+      T value = std::move(m_tail->value);
+      removeNode(m_tail);
+      return value;
+    }
+    return T{};
+  }
+
   inline void insert(size_t index, const T& element) {
     repairHeadTail(insertBefore(getNode(index), element));
   }
@@ -210,6 +221,62 @@ class List {
     return false;
   }
 
+    inline Array<size_t> find(const T& value, size_t startIdx = 0) const {
+    Array<size_t> indexes;
+
+    size_t index = 0;
+    for (Node* node = m_head; node; node = node->next) {
+      if (index >= startIndex) {
+        if (node->value == value) {
+          indexes.append(index);
+        }
+      }
+      index++;
+    }
+
+    return indexes;
+  }
+
+  inline size_t lfind(const T& value, size_t startIdx = 0) const {
+    size_t index = 0;
+    for (Node* node = m_head; node; node = node->next) {
+      if (index >= startIndex) {
+        if (node->value == value) {
+          return index;
+        }
+      }
+      index++;
+    }
+
+    return nidx;
+  }
+
+  inline size_t rfind(const T& value, size_t startIdx = 0) const {
+    size_t index = m_size-1;
+    for (Node* node = m_tail; node; node = node->prev) {
+      if (index <= startIndex) {
+        if (node->value == value) {
+          return index;
+        }
+      }
+      index--;
+    }
+
+    return nidx;
+  }
+
+  inline List unique() {
+    List result;
+
+    for (auto& value : *this) {
+      if (!result.contains(value)) {
+        result.append(value);
+      }
+    }
+
+    return result;
+  }
+
   inline void foreach(std::function<void(const T&)> f) {
     for (Node* node = m_head; node; node = node->next) {
       f(node->value);
@@ -228,9 +295,18 @@ class List {
   }
 
   template <typename R>
-  inline R reduce(std::function<R(R, const T&)> reducer) {
-    R result;
+  inline R reduce(std::function<R(R, const T&)> reducer, R startValue = {}) {
+    R result = startValue
     for (Node* node = m_head; node; node = node->next) {
+      result = reducer(result, node->value);
+    }
+    return result;
+  }
+
+  template <typename R>
+  inline R reduceRight(std::function<R(R, const T&)> reducer, R startValue = {}) {
+    R result = startValue;
+    for (Node* node = m_tail; node; node = node->prev) {
       result = reducer(result, node->value);
     }
     return result;

@@ -7,10 +7,17 @@
 namespace mrt {
 
 template <typename C, typename T>
-concept Collection = requires (C c) {
+concept Collection = requires (C c, size_t i) {
   { c.size() } -> std::same_as<size_t>;
-  // TODO: expand
+  { c[i] } -> std::same_as<T&>;
 };
+
+template <typename T, Collection<T> C>
+inline void swap(C& c, size_t i, size_t j) {
+  T tmp = c[i];
+  c[i] = c[j];
+  c[j] = tmp;
+}
 
 template <typename C, typename T>
 concept FilterableCollection = requires (C c, std::function<bool(const T&)> predicate) {

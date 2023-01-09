@@ -8,6 +8,7 @@ export CXXFLAGS  := -std=c++2a -I $(BUILD_DIR)/include
 #-fconcepts-diagnostics-depth=4
 
 ifeq ($(DEBUG),1)
+$(info [!] Debug on)
 CXXFLAGS += -g3 -D_DEBUG
 endif
 
@@ -16,6 +17,9 @@ endif
 build: install_headers
 	$(info [+] Building)
 	$(CXX) $(CXXFLAGS) test.cc -o $(BUILD_DIR)/bin/test
+	for file in $(TOPDIR)/tests/test_*.cc; do \
+		$(CXX) $(CXXFLAGS) $$file -o $(BUILD_DIR)/bin/$$(basename $${file%.*}); \
+	done
 
 install_headers: prepare
 	$(info [+] Installing headers)
@@ -27,5 +31,12 @@ prepare:
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/bin
 	mkdir -p $(BUILD_DIR)/include
+
+test:
+	for test in $(BUILD_DIR)/bin/test_*; do \
+		if [ -f $$test ]; then \
+			$$test; \
+		fi; \
+	done
 
 $(V).SILENT:
