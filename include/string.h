@@ -72,6 +72,12 @@ class BaseString : public Array<T> {
     append(s);
   }
 
+  inline BaseString(const T* s, size_t length) : Array<T>() {
+    for (size_t i = 0; i < length; i++) {
+      append(s[i]);
+    }
+  }
+
   inline BaseString(const std::string& s) : Array<T>() {
     append(s);
   }
