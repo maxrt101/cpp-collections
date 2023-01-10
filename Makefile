@@ -2,6 +2,7 @@
 
 export TOPDIR    := $(shell pwd)
 export BUILD_DIR := $(TOPDIR)/build
+export PREFIX    := $(BUILD_DIR)
 
 export CXX       := g++-10
 export CXXFLAGS  := -std=c++2a -I $(BUILD_DIR)/include
@@ -30,6 +31,12 @@ prepare:
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/bin
 	mkdir -p $(BUILD_DIR)/include
+
+install:
+	$(info [+] Installing to $(PREFIX))
+	mkdir -p $(PREFIX)
+	mkdir -p $(PREFIX)/include
+	cp -r include $(PREFIX)/include/mrt
 
 test:
 	for test in $(BUILD_DIR)/bin/test_*; do \
