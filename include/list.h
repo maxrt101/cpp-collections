@@ -19,9 +19,9 @@ class List {
     Node* next = nullptr;
 
     inline Node() {}
-    inline Node(T value) {}
-    inline Node(T value, Node* prev) {}
-    inline Node(T value, Node* prev, Node* next) {}
+    inline Node(T value) : value(value) {}
+    inline Node(T value, Node* prev) : value(value), prev(prev) {}
+    inline Node(T value, Node* prev, Node* next) : value(value), prev(prev), next(next) {}
 
     inline virtual ~Node() {}
   };
@@ -44,7 +44,7 @@ class List {
       return *this;
     }
 
-    T& operator*() { return m_node.value; }
+    T& operator*() { return m_node->value; }
 
     const T& operator*() const { return m_node.value; }
 
@@ -63,13 +63,13 @@ class List {
     }
 
     Iterator& operator--() {
-      if (m_node) m_node = m_node->prev;
+      m_node = m_node ? m_node->prev : m_list->m_tail;
       return *this;
     }
 
     Iterator operator--(int) {
       Iterator it = *this;
-      if (m_node) m_node = m_node->prev;
+      m_node = m_node ? m_node->prev : m_list->m_tail;
       return it;
     }
 
@@ -82,13 +82,13 @@ class List {
    public:
     inline ConstIterator() {}
     inline ConstIterator(const ConstIterator& rhs) : m_list(rhs.m_list), m_node(rhs.m_node) {}
-    inline ConstIterator(List* list) : m_list(list) {}
-    inline ConstIterator(List* list, Node* node) : m_list(list), m_node(node) {}
+    inline ConstIterator(const List* list) : m_list(list) {}
+    inline ConstIterator(const List* list, Node* node) : m_list(list), m_node(node) {}
 
     inline virtual ~ConstIterator() {}
 
     inline Node* node() const { return m_node; }
-    inline List* list() const { return m_list; }
+    inline const List* list() const { return m_list; }
 
     ConstIterator& operator=(const ConstIterator& rhs) {
       m_list = rhs.m_list;
@@ -96,7 +96,7 @@ class List {
       return *this;
     }
 
-    const T& operator*() const { return m_node.value; }
+    const T& operator*() const { return m_node->value; }
 
     bool operator==(const ConstIterator& rhs) const { return m_node == rhs.m_node; }
     bool operator!=(const ConstIterator& rhs) const { return m_node != rhs.m_node; }
@@ -107,19 +107,19 @@ class List {
     }
 
     ConstIterator operator++(int) {
-      Iterator it = *this;
+      ConstIterator it = *this;
       if (m_node) m_node = m_node->next;
       return it;
     }
 
     ConstIterator& operator--() {
-      if (m_node) m_node = m_node->prev;
+      m_node = m_node ? m_node->prev : m_list->m_tail;
       return *this;
     }
 
     ConstIterator operator--(int) {
-      Iterator it = *this;
-      if (m_node) m_node = m_node->prev;
+      ConstIterator it = *this;
+      m_node = m_node ? m_node->prev : m_list->m_tail;
       return it;
     }
 
@@ -152,7 +152,7 @@ class List {
   inline Iterator tail() const { return Iterator(this, m_tail); }
 
   inline Iterator begin() { return Iterator(this, m_head); }
-  inline Iterator end() { return Iterator(this); }
+  inline Iterator end() { return Iterator(this, m_tail); }
 
   inline ConstIterator cbegin() const { return ConstIterator(this, m_head); }
   inline ConstIterator cend() const { return ConstIterator(this); }
@@ -161,24 +161,24 @@ class List {
     if (!m_tail) {
       m_tail = new Node(element);
       m_head = m_tail;
+      m_size++;
     } else {
       m_tail = insertAfter(m_tail, element);
     }
-    m_size++;
   }
 
   inline void prepend(const T& element) {
     if (!m_head) {
       m_head = new Node(element);
       m_tail = m_head;
+      m_size++;
     } else {
       m_head = insertBefore(m_head, element);
     }
-    m_size++;
   }
 
   inline T pop() {
-    if (!m_head) {
+    if (m_head) {
       T value = std::move(m_tail->value);
       removeNode(m_tail);
       return value;
@@ -200,7 +200,7 @@ class List {
 
   inline void remove(const Iterator& it) {
     removeNode(getNode(it));
-  }
+  }  
 
   inline void clear() {
     for (Node* node = m_head; node; node = node->next) {
@@ -219,6 +219,32 @@ class List {
     }
 
     return false;
+  }
+
+  inline List slice(size_t start, size_t end = 0) const {
+    List result;
+
+    if (end == 0) {
+      size_t index = 0;
+      for (Node* node = m_head; node; node = node->next) {
+        if (index >= start) return result;
+        result.append(node->value);
+        index++;
+      }
+    } else {
+      size_t index = 0;
+      for (Node* node = m_head; node; node = node->next) {
+        if (index < start) {
+          index++;
+          continue;
+        }
+        if (index >= end) return result;
+        result.append(node->value);
+        index++;
+      }
+    }
+
+    return result;
   }
 
   inline Array<size_t> find(const T& value, size_t startIdx = 0) const {
@@ -251,7 +277,7 @@ class List {
     return nidx;
   }
 
-  inline size_t rfind(const T& value, size_t startIdx = 0) const {
+  inline size_t rfind(const T& value, size_t startIdx = nidx) const {
     size_t index = m_size-1;
     for (Node* node = m_tail; node; node = node->prev) {
       if (index <= startIdx) {
@@ -312,7 +338,16 @@ class List {
     return result;
   }
 
-  inline T& get(size_t index, const T& defaultValue) {
+  template <typename R = T>
+  inline List<R> map(std::function<R(const T&)> mapper) const {
+    List<R> result;
+    for (Node* node = m_head; node; node = node->next) {
+      result.append(mapper(node->value));
+    }
+    return result;
+  }
+
+  inline T& get(size_t index, T defaultValue) {
     Node* node = getNode(index);
     return node ? node->value : defaultValue;
   }
@@ -323,14 +358,15 @@ class List {
   }
 
   inline T& operator[](size_t index) {
-    return get(index);
+    return getNode(index)->value;
   }
 
   inline const T& operator[](size_t index) const {
-    return get(index);
+    return getNode(index)->value;
   }
 
   inline List& operator=(const List& rhs) {
+    clear();
     for (Node* node = rhs.m_head; node; node = node->next) {
       append(node->value);
     }
@@ -375,11 +411,11 @@ class List {
     List result;
 
     for (Node* node = m_head; node; node = node->next) {
-      append(node->value);
+      result.append(node->value);
     }
 
     for (Node* node = rhs.m_head; node; node = node->next) {
-      append(node->value);
+      result.append(node->value);
     }
 
     return result;
@@ -388,7 +424,7 @@ class List {
   inline List operator&(const List& rhs) const {
     List result;
 
-    for (Node* node = rhs.m_head; node; node = node->next) {
+    for (Node* node = m_head; node; node = node->next) {
       if (rhs.contains(node->value)) {
         result.append(node->value);
       }
@@ -400,7 +436,7 @@ class List {
   inline List operator|(const List& rhs) const {
     List result;
 
-    for (Node* node = rhs.m_head; node; node = node->next) {
+    for (Node* node = m_head; node; node = node->next) {
       if (!rhs.contains(node->value)) {
         result.append(node->value);
       }
@@ -435,17 +471,21 @@ class List {
   inline Node* insertAfter(Node* node, const T& value) {
     if (!node) return nullptr;
     Node* newNode = new Node(value, node, node->next);
+    if (node->next)
+      node->next->prev = newNode;
     node->next = newNode;
     m_size++;
-    return node;
+    return newNode;
   }
 
   inline Node* insertBefore(Node* node, const T& value) {
     if (!node) return nullptr;
     Node* newNode = new Node(value, node->prev, node);
+    if (node->prev)
+      node->prev->next = newNode;
     node->prev = newNode;
     m_size++;
-    return node;
+    return newNode;
   }
 
   inline void removeNode(Node* node) {
@@ -453,6 +493,7 @@ class List {
 
     if (node->prev) {
       node->prev->next = node->next;
+      // if (node->next)
     } else {
       m_head = node->next;
     }

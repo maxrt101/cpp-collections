@@ -143,7 +143,7 @@ bool test_endsWith() {
 }
 
 int main(int argc, char ** argv) {
-  mrt::TestFramework framework("array");
+  mrt::TestFramework framework("string");
 
   framework.addTests({
     {"test_create_from_cstr", test_create_from_cstr},

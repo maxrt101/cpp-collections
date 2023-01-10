@@ -29,16 +29,16 @@ template <typename CharT = char>
 inline BaseString<CharT> toString(void* value);
 
 template <typename T1, typename T2, typename CharT = char>
-inline BaseString<CharT> toString(Pair<T1, T2>& value);
+inline BaseString<CharT> toString(const Pair<T1, T2>& value);
 
 template <typename T, Collection<T> C, typename CharT = char>
-inline BaseString<CharT> collectionToBaseString(C& value);
+inline BaseString<CharT> collectionToBaseString(const C& value);
 
 template <typename T, typename CharT = char>
-inline BaseString<CharT> toString(Array<T>& value);
+inline BaseString<CharT> toString(const Array<T>& value);
 
 template <typename T, typename CharT = char>
-inline BaseString<CharT> toString(List<T>& value);
+inline BaseString<CharT> toString(const List<T>& value);
 
 
 template <typename T = char>
@@ -345,12 +345,12 @@ inline BaseString<CharT> toString(void* value) {
 }
 
 template <typename T1, typename T2, typename CharT = char>
-inline BaseString<CharT> toString(Pair<T1, T2>& value) {
+inline BaseString<CharT> toString(const Pair<T1, T2>& value) {
   return BaseString<CharT>::format("({}, {})", value._1, value._2);
 }
 
 template <typename T, Collection<T> C, typename CharT = char>
-inline BaseString<CharT> collectionToBaseString(C& value) {
+inline BaseString<CharT> collectionToBaseString(const C& value) {
   BaseString<CharT> result = "{";
   for (size_t i = 0; i < value.size(); i++) {
     result.append(toString(value[i]));
@@ -361,13 +361,27 @@ inline BaseString<CharT> collectionToBaseString(C& value) {
 }
 
 template <typename T, typename CharT = char>
-inline BaseString<CharT> toString(Array<T>& value) {
-  return collectionToBaseString<T, Array<T>>(value);
+inline BaseString<CharT> toString(const Array<T>& value) {
+  BaseString<CharT> result = "{";
+  for (size_t i = 0; i < value.size(); i++) {
+    result.append(toString(value[i]));
+    if (i + 1 < value.size())
+      result.append(", ");
+  }
+  return result + "}";
 }
 
 template <typename T, typename CharT = char>
-inline BaseString<CharT> toString(List<T>& value) {
-  return collectionToBaseString<T, List<T>>(value);
+inline BaseString<CharT> toString(const List<T>& value) {
+  BaseString<CharT> result = "{";
+  size_t index = 0;
+  for (auto it = value.cbegin(); it != value.cend(); it++) {
+    result.append(toString(*it));
+    if (index + 1 < value.size())
+      result.append(", ");
+    index++;
+  }
+  return result + "}";
 }
 
 using String = BaseString<char>;
