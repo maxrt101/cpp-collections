@@ -23,7 +23,25 @@ template <typename CharT = char>
 inline BaseString<CharT> toString(int value);
 
 template <typename CharT = char>
+inline BaseString<CharT> toString(long value);
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(long long value);
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned value);
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned long value);
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned long value);
+
+template <typename CharT = char>
 inline BaseString<CharT> toString(float value);
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(double value);
 
 template <typename CharT = char>
 inline BaseString<CharT> toString(void* value);
@@ -81,17 +99,22 @@ class BaseString : public Array<T> {
     while (*s) {
       this->Array<T>::append(*s++);
     }
+    this->Array<T>::reserve(this->size()+1);
+    this->Array<T>::operator[](this->size()) = 0;
   }
 
   inline void append(T c) {
     this->Array<T>::append(c);
+    this->Array<T>::reserve(this->size()+1);
+    this->Array<T>::operator[](this->size()) = 0;
   }
 
   inline void append(const std::string& s) {
-    this->reserve(this->size() + s.size());
+    this->reserve(this->size() + s.size() + 1);
     for (size_t i = 0; i < s.size(); i++) {
       this->Array<T>::append(s[i]);
     }
+    this->Array<T>::operator[](this->size()) = 0;
   }
 
   inline const char* operator*() {
@@ -333,7 +356,37 @@ inline BaseString<CharT> toString(int value) {
 }
 
 template <typename CharT = char>
+inline BaseString<CharT> toString(long value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(long long value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned long value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(unsigned long long value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
 inline BaseString<CharT> toString(float value) {
+  return BaseString(std::to_string(value));
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(double value) {
   return BaseString(std::to_string(value));
 }
 

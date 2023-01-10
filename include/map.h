@@ -21,17 +21,46 @@ size_t getHash(const T& value) {
   return value.hash();
 }
 
-template <typename T>
+template <>
 size_t getHash(const int& value) {
   return value;
 }
 
-template <typename T>
-size_t getHash(const float& value) {
+template <>
+size_t getHash(const long& value) {
   return value;
 }
 
-template <typename T>
+template <>
+size_t getHash(const long long& value) {
+  return value;
+}
+
+template <>
+size_t getHash(const unsigned& value) {
+  return value;
+}
+
+template <>
+size_t getHash(const unsigned long& value) {
+  return value;
+}
+
+template <>
+size_t getHash(const unsigned long long& value) {
+  return value;
+}
+
+template <>
+size_t getHash(const float& value) {
+  return *(size_t*)((void*)&value);
+}
+
+template <>
+size_t getHash(const double& value) {
+  return *(size_t*)((void*)&value);
+}
+
 size_t getHash(const void* value) {
   return (size_t) value;
 }
@@ -41,6 +70,10 @@ class Map {
  public:
   struct NoSuchElementException : public std::exception {
     inline NoSuchElementException() {}
+  };
+
+  struct MismatchedSizesException : public std::exception {
+    inline MismatchedSizesException() {}
   };
 
   struct Node {
@@ -276,6 +309,15 @@ class Map {
 
   inline virtual ~Map() {
     clear();
+  }
+
+  static Map fromArrays(const Array<K>& keys, const Array<V>& values) {
+    if (keys.size() != values.size()) throw MismatchedSizesException();
+    Map result;
+    for (size_t i = 0; i < keys.size(); i++) {
+      result[keys[i]] = values[i];
+    }
+    return result;
   }
 
   inline size_t size() const {

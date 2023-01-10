@@ -124,6 +124,7 @@ struct RangeGenerator {
   }
   
   inline size_t operator()(size_t count) {
+    if (begin && counter < begin) counter = begin;
     if (counter >= end) throw GeneratorException();
     size_t result = counter;
     counter += step;
@@ -152,7 +153,7 @@ inline void yield() {
   throw GeneratorException();
 }
 
-inline Generator<size_t> range(size_t begin, size_t end = -1, size_t step = 1) {
+inline Generator<size_t> range(size_t begin, size_t end = -1UL, size_t step = 1) {
   return {RangeGenerator(begin, end, step)};
 }
 
