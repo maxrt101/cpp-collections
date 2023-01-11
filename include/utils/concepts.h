@@ -1,6 +1,7 @@
 #ifndef _MRT_COLLECTIONS_UTILS_CONCEPTS_H_
 #define _MRT_COLLECTIONS_UTILS_CONCEPTS_H_ 1
 
+#include <type_traits>
 #include <concepts>
 #include <cstdlib>
 
@@ -44,6 +45,9 @@ template <typename T>
 concept Hashable = requires (T t) {
   { t.hash() } -> std::same_as<std::size_t>;
 };
+
+template <typename T>
+concept IsEnum = std::is_enum_v<T>;
 
 template <typename T>
 concept ConvertibleToString = requires (T t) {

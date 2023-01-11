@@ -21,6 +21,11 @@ size_t getHash(const T& value) {
   return value.hash();
 }
 
+template <IsEnum T>
+size_t getHash(const T& value) {
+  return (size_t) value;
+}
+
 template <>
 size_t getHash(const int& value) {
   return value;

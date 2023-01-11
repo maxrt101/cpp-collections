@@ -124,6 +124,14 @@ bool test_iterators() {
   return result == expected;
 }
 
+enum class E {A, B, C};
+
+bool test_enum_key() {
+  mrt::Map<E, int> map = {{E::A, 10}, {E::B, 20}, {E::C, 30}};
+
+  return map[E::A] == 10;
+}
+
 int main(int argc, char ** argv) {
   mrt::TestFramework framework("map");
 
@@ -142,6 +150,7 @@ int main(int argc, char ** argv) {
     {"test_notequals", test_notequals},
     {"test_combine", test_combine},
     {"test_iterators", test_iterators},
+    {"test_enum_key", test_enum_key},
   });
 
   return framework.run(argc, argv);
