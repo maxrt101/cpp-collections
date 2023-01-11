@@ -8,6 +8,13 @@ bool test_create_from_cstr() {
   return s.size() == 3 && s[0] == 'A' && s[1] == 'B' && s[2] == 'C';
 }
 
+bool test_create_from_cstr2() {
+  const char* cs = "ABCDEFGH";
+  auto s = mrt::String(cs, cs+5);
+
+  return s == "ABCDE";
+}
+
 bool test_create_from_cstr_len() {
   auto s = mrt::String("ABCEDF", 3);
 
@@ -153,6 +160,7 @@ int main(int argc, char ** argv) {
 
   framework.addTests({
     {"test_create_from_cstr", test_create_from_cstr},
+    {"test_create_from_cstr2", test_create_from_cstr2},
     {"test_create_from_cstr_len", test_create_from_cstr_len},
     {"test_create_from_cppstr", test_create_from_cppstr},
     {"test_cstr", test_cstr},

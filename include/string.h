@@ -71,6 +71,13 @@ class BaseString : public Array<T> {
   inline BaseString(const T* s) : Array<T>() {
     append(s);
   }
+  
+  inline BaseString(const T* start, const T* end) : Array<T>() {
+    if (!start || !end || start > end) return;
+    while (start < end) {
+      append(*start++);
+    }
+  }
 
   inline BaseString(const T* s, size_t length) : Array<T>() {
     for (size_t i = 0; i < length; i++) {
