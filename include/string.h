@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cctype>
+#include <mrt/utils/concepts.h>
 #include <mrt/array.h>
 #include <mrt/list.h>
 #include <mrt/pair.h>
@@ -14,6 +15,9 @@ class BaseString;
 
 
 template <typename T, typename CharT = char>
+inline BaseString<CharT> toString(T value);
+
+template <IsEnum T, typename CharT = char>
 inline BaseString<CharT> toString(T value);
 
 template <typename CharT = char>
@@ -373,6 +377,11 @@ class BaseString : public Array<T> {
 template <typename T, typename CharT = char>
 inline BaseString<CharT> toString(T value) {
   return value.toString();
+}
+
+template <IsEnum T, typename CharT = char>
+inline BaseString<CharT> toString(T value) {
+  return BaseString(std::to_string((int) value));
 }
 
 template <typename CharT = char>
