@@ -23,6 +23,9 @@ template <typename CharT = char>
 inline BaseString<CharT> toString(char value);
 
 template <typename CharT = char>
+inline BaseString<CharT> toString(const char* value);
+
+template <typename CharT = char>
 inline BaseString<CharT> toString(int value);
 
 template <typename CharT = char>
@@ -69,6 +72,7 @@ class BaseString : public Array<T> {
 
   inline BaseString(const BaseString& s) {
     this->Array<T>::operator=(s);
+    addNull();
   }
 
   inline BaseString(const T* s) : Array<T>() {
@@ -94,6 +98,7 @@ class BaseString : public Array<T> {
 
   inline BaseString(const Array<T>& a) : Array<T>() {
     this->Array<T>::operator=(a);
+    addNull();
   }
 
   inline const char* c_str() const {
@@ -115,14 +120,12 @@ class BaseString : public Array<T> {
     while (*s) {
       this->Array<T>::append(*s++);
     }
-    this->Array<T>::reserve(this->size()+1);
-    this->Array<T>::operator[](this->size()) = 0;
+    addNull();
   }
 
   inline void append(T c) {
     this->Array<T>::append(c);
-    this->Array<T>::reserve(this->size()+1);
-    this->Array<T>::operator[](this->size()) = 0;
+    addNull();
   }
 
   inline void append(const std::string& s) {
@@ -130,7 +133,7 @@ class BaseString : public Array<T> {
     for (size_t i = 0; i < s.size(); i++) {
       this->Array<T>::append(s[i]);
     }
-    this->Array<T>::operator[](this->size()) = 0;
+    addNull();
   }
 
   inline const char* operator*() const {
@@ -313,6 +316,13 @@ class BaseString : public Array<T> {
   }
 
  private:
+  void addNull() {
+    if (this->size() + 1 <= this->capacity()) {
+      this->Array<T>::reserve(this->size()+1);
+      this->Array<T>::operator[](this->size()) = 0;
+    }
+  }
+
   struct impl {
     template <typename... Args>
     static inline void format(const char* fmt, BaseString& result) {
@@ -373,6 +383,11 @@ inline BaseString<CharT> toString(BaseString<CharT>& value) {
 template <typename CharT = char>
 inline BaseString<CharT> toString(char value) {
   return BaseString() + value;
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(const char* value) {
+  return BaseString(value);
 }
 
 template <typename CharT = char>

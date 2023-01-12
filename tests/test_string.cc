@@ -27,6 +27,19 @@ bool test_create_from_cppstr() {
   return s.size() == 3 && s[0] == 'A' && s[1] == 'B' && s[2] == 'C';
 }
 
+bool test_format() {
+  auto s = mrt::String::format("Test format c={} s={} i={}", 'c', "abc", 20);
+  mrt::String expected = "Test format c=c s=abc i=20";
+
+  return s == expected;
+}
+
+bool test_format_novar() {
+  mrt::String expected = "Test format c=c s=abc i=20";
+
+  return mrt::String::format("Test format c={} s={} i={}", 'c', "abc", 20) == expected;
+}
+
 bool test_cstr() {
   mrt::String s = "ABC";
 
@@ -169,6 +182,8 @@ int main(int argc, char ** argv) {
     {"test_create_from_cstr2", test_create_from_cstr2},
     {"test_create_from_cstr_len", test_create_from_cstr_len},
     {"test_create_from_cppstr", test_create_from_cppstr},
+    {"test_format", test_format},
+    {"test_format_novar", test_format_novar},
     {"test_cstr", test_cstr},
     {"test_cppstr", test_cppstr},
     {"test_append_str", test_append_str},
