@@ -105,6 +105,10 @@ class Map {
     }
 
     inline void addToChain(Node* node) {
+      if (!next) {
+        next = node;
+        return;
+      }
       Node* tmp = next;
       while (tmp->next) tmp = tmp->next;
       tmp->next = node;
