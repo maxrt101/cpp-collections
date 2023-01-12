@@ -105,6 +105,12 @@ bool test_find() {
   return s.find("DE") == 3;
 }
 
+bool test_find_ch() {
+  mrt::String s = "ABCDEF";
+
+  return s.find('E') == 4;
+}
+
 bool test_substr() {
   mrt::String s = "ABCDEF";
 
@@ -175,6 +181,7 @@ int main(int argc, char ** argv) {
     {"test_insert", test_insert},
     {"test_hash", test_hash},
     {"test_find", test_find},
+    {"test_find_ch", test_find_ch},
     {"test_substr", test_substr},
     {"test_upper", test_upper},
     {"test_lower", test_lower},

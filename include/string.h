@@ -219,6 +219,10 @@ class BaseString : public Array<T> {
     return result;
   }
 
+  inline size_t find(T c, size_t startIdx = 0) const {
+    return this->Array<T>::lfind(c, startIdx);
+  }
+
   inline size_t find(const BaseString& pattern, size_t startIdx = 0) const {
     size_t patternHash = pattern.hash();
     for (size_t i = startIdx; i < this->size(); i++) {
