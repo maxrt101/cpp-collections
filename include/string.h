@@ -130,7 +130,7 @@ class BaseString : public Array<T> {
     this->Array<T>::operator[](this->size()) = 0;
   }
 
-  inline const char* operator*() {
+  inline const char* operator*() const {
     return this->data();
   }
 
