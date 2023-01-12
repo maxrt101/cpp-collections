@@ -21,7 +21,7 @@ template <IsEnum T, typename CharT = char>
 inline BaseString<CharT> toString(T value);
 
 template <typename CharT = char>
-inline BaseString<CharT> toString(BaseString<CharT>& value);
+inline BaseString<CharT> toString(const BaseString<CharT>& value);
 
 template <typename CharT = char>
 inline BaseString<CharT> toString(char value);
@@ -385,7 +385,7 @@ inline BaseString<CharT> toString(T value) {
 }
 
 template <typename CharT = char>
-inline BaseString<CharT> toString(BaseString<CharT>& value) {
+inline BaseString<CharT> toString(const BaseString<CharT>& value) {
   return value;
 }
 
