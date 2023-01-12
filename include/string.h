@@ -20,6 +20,9 @@ template <typename CharT = char>
 inline BaseString<CharT> toString(BaseString<CharT>& value);
 
 template <typename CharT = char>
+inline BaseString<CharT> toString(char value);
+
+template <typename CharT = char>
 inline BaseString<CharT> toString(int value);
 
 template <typename CharT = char>
@@ -365,6 +368,11 @@ inline BaseString<CharT> toString(T value) {
 template <typename CharT = char>
 inline BaseString<CharT> toString(BaseString<CharT>& value) {
   return value;
+}
+
+template <typename CharT = char>
+inline BaseString<CharT> toString(char value) {
+  return BaseString() + value;
 }
 
 template <typename CharT = char>
