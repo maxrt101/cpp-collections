@@ -601,13 +601,15 @@ class Map {
     if (m_buckets.size()) {
       auto buckets = m_buckets;
       m_buckets = Array<Node*>::filled(m_capacity, nullptr);
-      for (auto& node : m_buckets) {
+      for (auto& node : buckets) {
         if (node) {
-          addNewNode(node);
-          Node* tmp = node;
+          addNewNode(new Node(node->key(), node->value()), false);
+          Node* tmp = node->next;
           while (tmp) {
-            addNewNode(tmp);
+            addNewNode(tmp, false);
+            Node* toDelete = tmp;
             tmp = tmp->next;
+            delete toDelete;
           }
         }
       }
@@ -618,11 +620,13 @@ class Map {
     }
   }
 
-  void addNewNode(Node* node) {
-    if (!m_buckets.size()) recreateBuckets();
-    if (loadFactor() >= MAX_LOAD_FACTOR) {
-      m_capacity *= GROWTH_FACTOR;
-      recreateBuckets();
+  void addNewNode(Node* node, bool check = true) {
+    if (check) {
+      if (!m_buckets.size()) recreateBuckets();
+      if (loadFactor() >= MAX_LOAD_FACTOR) {
+        m_capacity *= GROWTH_FACTOR;
+        recreateBuckets();
+      }
     }
 
     if (!node) return;
