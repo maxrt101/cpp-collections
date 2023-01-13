@@ -12,61 +12,61 @@
 namespace mrt {
 
 template <typename T>
-size_t getHash(const T& value) {
+inline size_t getHash(const T& value) {
   return std::hash(value);
 }
 
 template <Hashable T>
-size_t getHash(const T& value) {
+inline size_t getHash(const T& value) {
   return value.hash();
 }
 
 template <IsEnum T>
-size_t getHash(const T& value) {
+inline size_t getHash(const T& value) {
   return (size_t) value;
 }
 
 template <>
-size_t getHash(const int& value) {
+inline size_t getHash(const int& value) {
   return value;
 }
 
 template <>
-size_t getHash(const long& value) {
+inline size_t getHash(const long& value) {
   return value;
 }
 
 template <>
-size_t getHash(const long long& value) {
+inline size_t getHash(const long long& value) {
   return value;
 }
 
 template <>
-size_t getHash(const unsigned& value) {
+inline size_t getHash(const unsigned& value) {
   return value;
 }
 
 template <>
-size_t getHash(const unsigned long& value) {
+inline size_t getHash(const unsigned long& value) {
   return value;
 }
 
 template <>
-size_t getHash(const unsigned long long& value) {
+inline size_t getHash(const unsigned long long& value) {
   return value;
 }
 
 template <>
-size_t getHash(const float& value) {
+inline size_t getHash(const float& value) {
   return *(size_t*)((void*)&value);
 }
 
 template <>
-size_t getHash(const double& value) {
+inline size_t getHash(const double& value) {
   return *(size_t*)((void*)&value);
 }
 
-size_t getHash(const void* value) {
+inline size_t getHash(const void* value) {
   return (size_t) value;
 }
 
